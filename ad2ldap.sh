@@ -4,7 +4,7 @@
 #
 # Script to convert a Microsoft AD CSV export to a LDAP LDIF
 #
-# Version: 0.1.0
+# Version: 0.1.1
 
 ### USAGE AND INPUT
 
@@ -13,7 +13,7 @@ usage () {
   echo ""
   echo "$0 -i <input file> -o <output file>"
   echo ""
-  echo "Note that the input file type must be \".csv\""
+  echo "The input file type must be \".csv\""
   echo ""
   exit 1
 }
@@ -98,7 +98,7 @@ echo "$PRINTGROUPS" && echo "$PRINTGROUPS" >> $OUTPUTFILE
   fi
 done
 
-#COUNTER2000=2000
+COUNTER2000=2000
 cat $INPUTFILE | iconv -f UTF-8 -t ASCII//TRANSLIT | awk -F '#' '{ print $115 "#" $114 "#" $1 "#" $52 }' | grep -v -e '^[[:space:]]*$' -e '^#' | sort | while read LINE; do
   # Read from input file
   GIVENNAME=$( echo $LINE | awk -F '#' '{ print $1 }' )
@@ -113,10 +113,10 @@ cat $INPUTFILE | iconv -f UTF-8 -t ASCII//TRANSLIT | awk -F '#' '{ print $115 "#
   fi
   GROUP=$( echo $LINE | awk -F '#' '{ print $4 }' | cut -s -f 2 -d ',' | sed 's/ //' )
   if ( cat $OUTPUTFILE | grep -q "uid=${USERNAME}" ); then #prevent duplicates
-    #:
+    :
     cat $OUTPUTFILE | grep "uid=${USERNAME}"
   else
-      # Print to output file and stdout
+    # Print to output file and stdout
 PRINT="dn: uid=${USERNAME},ou=${OU},ou=users,dc=gertzenstein,dc=local
 changetype: add
 objectClass: top
@@ -131,12 +131,13 @@ mail: ${USERNAME}@gertzenstein.local
 homeDirectory: /home/users/${USERNAME}
 loginShell: /bin/bash
 uidNumber: ${COUNTER2000}
-gidNumber: ${COUNTER2000}
-userPassword: ${USERNAME}1234"
+gidNumber: ${COUNTER2000}"
 echo "$PRINT" && echo "$PRINT" >> $OUTPUTFILE
-  if [[ $DISABLED == "1" ]]; then
-    PRINTDISABLED="pwdAccountLockedTime: 000001010000Z" && echo $PRINTDISABLED >> $OUTPUTFILE && echo $PRINTDISABLED
-  fi
+    if [[ $DISABLED == "1" ]]; then
+      PRINTDISABLED="pwdAccountLockedTime: 000001010000Z" && echo $PRINTDISABLED >> $OUTPUTFILE && echo $PRINTDISABLED
+    else
+      PRINTPASSWORD="userPassword: ${USERNAME}1234" && echo $PRINTPASSWORD >> $OUTPUTFILE && echo $PRINTPASSWORD
+    fi
 PRINTGROUP="
 dn: cn=${GROUP},ou=groups,dc=gertzenstein,dc=local
 changetype: modify
