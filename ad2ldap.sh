@@ -11,7 +11,7 @@
 usage () {
   echo "Usage:"
   echo ""
-  echo "$0 -i <input file> -o <directory for generated output files>"
+  echo "$0 -i <input file> -o <output file>"
   echo ""
   echo "Note that the input file type must be \".csv\""
   echo ""
@@ -41,8 +41,6 @@ fi
 ### FUNCTIONS
 
 ### LOGIC
-
-#CURRENTDATE=$( date +%Y%m%d-%H%M%S )
 
 echo "" > $OUTPUTFILE
 
